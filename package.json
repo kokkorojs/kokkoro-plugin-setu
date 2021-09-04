@@ -1,0 +1,28 @@
+{
+  "name": "kokkoro-plugin-setu",
+  "version": "0.0.1",
+  "description": "好色哦，我都不看这些的",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dcyuki/kokkoro-plugin-setu.git"
+  },
+  "keywords": [
+    "qq",
+    "bot",
+    "qqbot",
+    "android",
+    "oicq",
+    "coolq",
+    "kokkoro"
+  ],
+  "author": "dc_yuki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dcyuki/kokkoro-plugins-setu/issues"
+  },
+  "homepage": "https://github.com/dcyuki/kokkoro-plugins-setu#readme",
+  "devDependencies": {
+    "kokkoro": "^0.0.2"
+  }
+}
