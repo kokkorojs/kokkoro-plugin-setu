@@ -3,6 +3,8 @@ const { existsSync } = require('fs');
 const { writeFile, readdir, mkdir, unlink } = require('fs/promises');
 const { axios, schedule, cwd, logger, checkCommand, sendImage, at } = require('kokkoro');
 
+let reloading;
+
 const max_setu = 50;
 const reload_num = 10;
 const lsp = new Map();
@@ -55,52 +57,57 @@ async function smallBlackRoom(event, max_lsp) {
 
 // #region 补充色图
 function reload() {
-  for (let i = 0; i <= 1; i++) {
-    if (eval(`all_setu.r${17 + i}`).length > max_setu) { logger.mark(`r${17 + i} 库存充足，不用补充`); continue }
+  // 防抖处理
+  clearTimeout(reloading);
 
-    const params = {
-      r18: i,
-      num: reload_num,
-      size: 'small',
+  reloading = setTimeout(() => {
+    for (let i = 0; i <= 1; i++) {
+      if (eval(`all_setu.r${17 + i}`).length > max_setu) { logger.mark(`r${17 + i} 库存充足，不用补充`); continue }
+
+      const params = {
+        r18: i,
+        num: reload_num,
+        size: 'small',
+      }
+
+      logger.mark(`r${17 + i} 色图正在补充中...`);
+      axios.post(api, params)
+        .then(response => {
+          const { error } = response;
+
+          if (error) { logger.error(error); return }
+
+          const { data: setu } = response.data;
+          const setu_length = setu.length;
+
+          for (let j = 0; j < setu_length; j++) {
+            /**
+              * 文件名不能包含 \ / : * ? " < > |
+              * cq 码 url 不能包括 [ ]
+              * pid 与 title 之间使用 @ 符分割，title 若出现非法字符则替换为 -
+              */
+            const { urls: { small: url }, uid, author, pid, title } = setu[j];
+            const setu_name = `${uid}@${author}@${pid}@${title.replace(/(\\|\/|:|\*|\?|"|<|>|\||\[|\])/g, '-')}`;
+            const setu_url = join(cwd, `/data/images/setu/${!i ? 'r17' : 'r18'}/${setu_name}`);
+
+            axios.get(url, { responseType: 'arraybuffer' })
+              .then(response => {
+                writeFile(setu_url, response.data, 'binary')
+                  .then(() => {
+                    eval(`all_setu.r${17 + i}`).push(setu_name);
+                    logger.mark(`setu download success, ${pid} ${title}`);
+                  })
+                  .catch(error => {
+                    logger.error(error.message);
+                  })
+              })
+              .catch(error => {
+                logger.error(error.message);
+              })
+          }
+        });
     }
-
-    logger.mark(`r${17 + i} 色图正在补充中...`);
-    axios.post(api, params)
-      .then(response => {
-        const { error } = response;
-
-        if (error) { logger.error(error); return }
-
-        const { data: setu } = response.data;
-        const setu_length = setu.length;
-
-        for (let j = 0; j < setu_length; j++) {
-          /**
-            * 文件名不能包含 \ / : * ? " < > |
-            * cq 码 url 不能包括 [ ]
-            * pid 与 title 之间使用 @ 符分割，title 若出现非法字符则替换为 -
-            */
-          const { urls: { small: url }, uid, author, pid, title } = setu[j];
-          const setu_name = `${uid}@${author}@${pid}@${title.replace(/(\\|\/|:|\*|\?|"|<|>|\||\[|\])/g, '-')}`;
-          const setu_url = join(cwd, `/data/images/setu/${!i ? 'r17' : 'r18'}/${setu_name}`);
-
-          axios.get(url, { responseType: 'arraybuffer' })
-            .then(response => {
-              writeFile(setu_url, response.data, 'binary')
-                .then(() => {
-                  eval(`all_setu.r${17 + i}`).push(setu_name);
-                  logger.mark(`setu download success, ${pid} ${title}`);
-                })
-                .catch(error => {
-                  logger.error(error.message);
-                })
-            })
-            .catch(error => {
-              logger.error(error.message);
-            })
-        }
-      });
-  }
+  }, 60000);
 }
 // #endregion
 
