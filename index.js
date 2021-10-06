@@ -1,7 +1,7 @@
 const { join } = require('path')
 const { existsSync } = require('fs');
 const { writeFile, readdir, mkdir, unlink } = require('fs/promises');
-const { axios, schedule, cwd, logger, checkCommand, sendImage, at } = require('kokkoro');
+const { axios, schedule, cwd, logger, checkCommand, cqcode } = require('kokkoro');
 
 let reloading;
 
@@ -10,6 +10,8 @@ const reload_num = 10;
 const lsp = new Map();
 const all_setu = { r17: [], r18: [] };
 const api = 'https://api.lolicon.app/setu/v2';
+const r17_path = join(cwd, `/data/images/setu/r17`);
+const r18_path = join(cwd, `/data/images/setu/r18`);
 
 // 每天 5 点重置 lsp
 schedule.scheduleJob('0 0 5 * * ?', () => lsp.clear());
@@ -18,19 +20,19 @@ schedule.scheduleJob('0 0 5 * * ?', () => lsp.clear());
 (async () => {
   try {
     Object.defineProperty(all_setu, 'r17', {
-      value: await readdir(join(cwd, `/data/images/setu/r17`)),
+      value: await readdir(r17_path),
       writable: false
     });
     Object.defineProperty(all_setu, 'r18', {
-      value: await readdir(join(cwd, `/data/images/setu/r18`)),
+      value: await readdir(r18_path),
       writable: false
     });
   } catch (error) {
     !existsSync(join(cwd, `/data/images`)) && await mkdir(join(cwd, `/data/images`));
 
     await mkdir(join(cwd, `/data/images/setu`));
-    await mkdir(join(cwd, `/data/images/setu/r17`));
-    await mkdir(join(cwd, `/data/images/setu/r18`));
+    await mkdir(r17_path);
+    await mkdir(r18_path);
   }
 
   reload();
@@ -47,7 +49,7 @@ async function smallBlackRoom(event, max_lsp) {
   if (lsp.get(user_id) >= max_lsp) {
     this.setGroupBan(group_id, user_id, 60 * 5);
 
-    reply(`${at(user_id)} ${await sendImage(`${__dirname}/image/kyaru.jpg`)}`);
+    reply(`${cqcode.at(user_id)} ${await cqcode.image(`${__dirname}/image/kyaru.jpg`)}`);
     return true;
   } else {
     return false;
@@ -88,7 +90,7 @@ function reload() {
               */
             const { urls: { small: url }, uid, author, pid, title } = setu[j];
             const setu_name = `${uid}@${author}@${pid}@${title.replace(/(\\|\/|:|\*|\?|"|<|>|\||\[|\])/g, '-')}`;
-            const setu_url = join(cwd, `/data/images/setu/${!i ? 'r17' : 'r18'}/${setu_name}`);
+            const setu_url = join(`${!i ? r17_path : r18_path}/${setu_name}`);
 
             axios.get(url, { responseType: 'arraybuffer' })
               .then(response => {
@@ -107,7 +109,7 @@ function reload() {
           }
         });
     }
-  }, 60000);
+  }, 30000);
 }
 // #endregion
 
@@ -119,10 +121,10 @@ async function random(event, setting) {
   const { r18, flash, max_lsp } = setting;
 
   if (await smallBlackRoom.bind(this)(event, max_lsp)) return;
-  if (!eval(`all_setu.r${17 + r18}`).length) { reply(`${at(user_id)} 色图库存不足，请等待自动补充`); return; }
+  if (!eval(`all_setu.r${17 + r18}`).length) { reply(`${cqcode.at(user_id)} 色图库存不足，请等待自动补充`); return; }
 
   const setu = eval(`all_setu.r${17 + r18}`).pop();
-  const image = await sendImage(join(cwd, `/data/images/setu/${!r18 ? 'r17' : 'r18'}/${setu}`), flash);
+  const image = await cqcode.image(join(`${!r18 ? r17_path : r18_path}/${setu}`), flash);
   const [uid, author, pid, title] = setu.split('@');
 
   const message = `作者: ${author} (${uid})\n标题: ${title} (${pid})\n${image}`;
@@ -131,7 +133,7 @@ async function random(event, setting) {
     .then(() => {
       lsp.set(user_id, lsp.get(user_id) + 1);
 
-      unlink(join(cwd, `/data/images/setu/${!r18 ? 'r17' : 'r18'}/${setu}`))
+      unlink(join(`${!r18 ? r17_path : r18_path}/${setu}`))
         .then(() => {
           logger.mark(`图片发送成功，已删除 ${image}`);
         })
@@ -156,7 +158,7 @@ async function search(event, setting) {
     tags: [tags],
   }
 
-  reply(`${at(user_id)} 图片下载中，请耐心等待喵~`);
+  reply(`${cqcode.at(user_id)} 图片下载中，请耐心等待喵~`);
 
   axios.post(api, params)
     .then(async (response) => {
@@ -167,7 +169,7 @@ async function search(event, setting) {
       const { data: setu } = response.data;
       const { pid, uid, title, author, tags, urls } = setu[0];
 
-      const image = await sendImage(urls[size], flash);
+      const image = await cqcode.image(urls[size], flash);
       const message = `作者: ${author} (${uid})\n标题: ${title} (${pid})\n${image}\nTags: ${tags}`;
 
       reply(message)
@@ -191,12 +193,12 @@ const default_setting = {
   r18: false,
   flash: true,
   // 'original', 'regular', 'small', 'thumb', 'mini'
-  size: 'small',
+  size: 'regular',
 }
 
 function listener(event) {
-  const dir = join(this.dir, 'config.js');
-  const setting = require(dir)[event.group_id].setting;
+  const dir = join(this.dir, 'config.json');
+  const setting = require(dir)[event.group_id].setting.setu;
   const mission = checkCommand(command, event.raw_message);
 
   setting.switch && eval(`${mission}.bind(this)(event, setting)`);
