@@ -14,7 +14,7 @@ npm i kokkoro-setu
 
 在 [kokkoro](https://github.com/kokkorojs/kokkoro) 成功运行并登录后，发送 `>enable setu` 即可启用插件
 
-※ 请确保 `config.json` 中的 `switch` 属性设置为 `true`
+※ 请确保 `setting.json` 中的 `switch` 属性设置为 `true`
 
 ## 注意
 
