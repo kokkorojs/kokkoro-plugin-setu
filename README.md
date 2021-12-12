@@ -9,10 +9,10 @@
 cd bot
 
 # 安装 npm 包
-npm i kokkoro-plugin-setu
+npm i kokkoro-setu
 ```
 
-在 [kokkoro](https://github.com/dcyuki/kokkoro) 成功运行并登录后，发送 `>plug on setu` 即可启用插件
+在 [kokkoro](https://github.com/kokkorojs/kokkoro) 成功运行并登录后，发送 `>enable setu` 即可启用插件
 
 ※ 请确保 `config.json` 中的 `switch` 属性设置为 `true`
 

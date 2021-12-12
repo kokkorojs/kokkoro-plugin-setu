@@ -1,17 +1,24 @@
 const { join } = require('path')
 const { existsSync } = require('fs');
 const { writeFile, readdir, mkdir, unlink } = require('fs/promises');
-const { axios, schedule, cwd, logger, checkCommand, cqcode } = require('kokkoro');
+const { logger, checkCommand, message, getOption } = require('kokkoro-core');
 
-let reloading;
+const axios = require('axios');
+const schedule = require('node-schedule');
+
+// 色图最后补充时间
+let reload_date = 0;
+// 补充 cd（默认 5 分钟）
+const reload_delay = 300000;
 
 const max_setu = 50;
-const reload_num = 10;
+const reload_num = 20;
 const lsp = new Map();
 const all_setu = { r17: [], r18: [] };
 const api = 'https://api.lolicon.app/setu/v2';
-const r17_path = join(cwd, `/data/images/setu/r17`);
-const r18_path = join(cwd, `/data/images/setu/r18`);
+const proxy = 'i.pixiv.re';
+const r17_path = join(__workname, `/data/images/setu/r17`);
+const r18_path = join(__workname, `/data/images/setu/r18`);
 
 // 每天 5 点重置 lsp
 schedule.scheduleJob('0 0 5 * * ?', () => lsp.clear());
@@ -28,9 +35,9 @@ schedule.scheduleJob('0 0 5 * * ?', () => lsp.clear());
       writable: false
     });
   } catch (error) {
-    !existsSync(join(cwd, `/data/images`)) && await mkdir(join(cwd, `/data/images`));
+    !existsSync(join(__workname, `/data/images`)) && await mkdir(join(__workname, `/data/images`));
 
-    await mkdir(join(cwd, `/data/images/setu`));
+    await mkdir(join(__workname, `/data/images/setu`));
     await mkdir(r17_path);
     await mkdir(r18_path);
   }
@@ -41,7 +48,7 @@ schedule.scheduleJob('0 0 5 * * ?', () => lsp.clear());
 
 // #region 关小黑屋
 async function smallBlackRoom(event, max_lsp) {
-  const { group_id, user_id, reply } = event;
+  const { group_id, user_id } = event;
 
   // 判断 lsp 要了几张图，超过 max_lsp 张关小黑屋
   !lsp.has(user_id) && lsp.set(user_id, 0);
@@ -49,7 +56,7 @@ async function smallBlackRoom(event, max_lsp) {
   if (lsp.get(user_id) >= max_lsp) {
     this.setGroupBan(group_id, user_id, 60 * 5);
 
-    reply(`${cqcode.at(user_id)} ${await cqcode.image(`${__dirname}/image/kyaru.jpg`)}`);
+    event.reply(await message.image(`${__dirname}/image/kyaru.jpg`), true);
     return true;
   } else {
     return false;
@@ -59,14 +66,15 @@ async function smallBlackRoom(event, max_lsp) {
 
 // #region 补充色图
 function reload() {
-  // 防抖处理
-  clearTimeout(reloading);
+  const current_date = +new Date();
 
-  reloading = setTimeout(() => {
+  // 节流处理
+  if (current_date - reload_date >= reload_delay) {
     for (let i = 0; i <= 1; i++) {
       if (eval(`all_setu.r${17 + i}`).length > max_setu) { logger.mark(`r${17 + i} 库存充足，不用补充`); continue }
 
       const params = {
+        proxy,
         r18: i,
         num: reload_num,
         size: 'small',
@@ -84,12 +92,11 @@ function reload() {
 
           for (let j = 0; j < setu_length; j++) {
             /**
-              * 文件名不能包含 \ / : * ? " < > |
-              * cq 码 url 不能包括 [ ]
+              * 在 windows 下文件名不能包含 \ / : * ? " < > |
               * pid 与 title 之间使用 @ 符分割，title 若出现非法字符则替换为 -
               */
             const { urls: { small: url }, uid, author, pid, title } = setu[j];
-            const setu_name = `${uid}@${author}@${pid}@${title.replace(/(\\|\/|:|\*|\?|"|<|>|\||\[|\])/g, '-')}`;
+            const setu_name = `${uid}@${author}@${pid}@${title.replace(/(\\|\/|:|\*|\?|"|<|>|\|)/g, '-')}`;
             const setu_url = join(`${!i ? r17_path : r18_path}/${setu_name}`);
 
             axios.get(url, { responseType: 'arraybuffer' })
@@ -109,27 +116,28 @@ function reload() {
           }
         });
     }
-  }, 30000);
+
+    reload_date = current_date;
+  }
 }
 // #endregion
 
 // #region 发送本地随机涩图
-async function random(event, setting) {
+async function random(event, option) {
   reload();
 
-  const { user_id, reply } = event;
-  const { r18, flash, max_lsp } = setting;
+  const { user_id } = event;
+  const { r18, flash, max_lsp } = option;
 
   if (await smallBlackRoom.bind(this)(event, max_lsp)) return;
-  if (!eval(`all_setu.r${17 + r18}`).length) { reply(`${cqcode.at(user_id)} 色图库存不足，请等待自动补充`); return; }
+  if (!eval(`all_setu.r${17 + r18}`).length) { event.reply('色图库存不足，请等待自动补充', true); return; }
 
   const setu = eval(`all_setu.r${17 + r18}`).pop();
-  const image = await cqcode.image(join(`${!r18 ? r17_path : r18_path}/${setu}`), flash);
+  const image = await message.image(join(`${!r18 ? r17_path : r18_path}/${setu}`), flash);
   const [uid, author, pid, title] = setu.split('@');
 
-  const message = `作者: ${author} (${uid})\n标题: ${title} (${pid})\n${image}`;
-
-  reply(message)
+  event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})`);
+  event.reply(image)
     .then(() => {
       lsp.set(user_id, lsp.get(user_id) + 1);
 
@@ -145,40 +153,41 @@ async function random(event, setting) {
 // #endregion
 
 // #region 在线搜索涩图
-async function search(event, setting) {
-  const { user_id, raw_message, reply } = event;
-  const { r18, flash, max_lsp, size } = setting;
+async function search(event, option) {
+  const { user_id, raw_message } = event;
+  const { r18, flash, max_lsp, size } = option;
 
   if (await smallBlackRoom.bind(this)(event, max_lsp)) return;
 
   const tags = raw_message.slice(2, raw_message.length - 2);
   const params = {
+    proxy,
     r18: Number(r18),
     size: size,
     tags: [tags],
   }
 
-  reply(`${cqcode.at(user_id)} 图片下载中，请耐心等待喵~`);
+  event.reply('图片下载中，请耐心等待喵~', true);
 
   axios.post(api, params)
     .then(async (response) => {
       const { error } = response;
 
-      if (error) { reply(error); return }
+      if (error) { event.reply(error); return }
 
       const { data: setu } = response.data;
       const { pid, uid, title, author, tags, urls } = setu[0];
 
-      const image = await cqcode.image(urls[size], flash);
-      const message = `作者: ${author} (${uid})\n标题: ${title} (${pid})\n${image}\nTags: ${tags}`;
+      const image = await message.image(urls[size], flash);
 
-      reply(message)
+      event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})\n标签:\n  ${tags}`);
+      event.reply(image)
         .then(() => {
           lsp.set(user_id, lsp.get(user_id) + 1);
         })
     })
     .catch(error => {
-      reply(error);
+      event.reply(error);
     });
 }
 // #endregion
@@ -188,20 +197,26 @@ const command = {
   search: /^来[点张份][\S]+[涩瑟色]图$/
 }
 
-const default_setting = {
+const default_option = {
   max_lsp: 5,
   r18: false,
-  flash: true,
+  flash: false,
   // 'original', 'regular', 'small', 'thumb', 'mini'
   size: 'regular',
 }
 
 function listener(event) {
-  const dir = join(this.dir, 'config.json');
-  const setting = require(dir)[event.group_id].setting.setu;
+  const { uin } = this;
+  const { group_id } = event;
+
+  const option = getOption(uin, group_id, 'setu');
   const mission = checkCommand(command, event.raw_message);
 
-  setting.switch && eval(`${mission}.bind(this)(event, setting)`);
+  if (option.switch) {
+    mission && eval(`${mission}.bind(this)(event, option)`);
+  } else {
+    event.reply('不可以色色！')
+  }
 }
 
 function enable(bot) {
@@ -213,5 +228,5 @@ function disable(bot) {
 }
 
 module.exports = {
-  enable, disable, default_setting
+  enable, disable, default_option
 }

@@ -1,25 +1,23 @@
 {
-  "name": "kokkoro-plugin-setu",
-  "version": "0.0.3",
+  "name": "kokkoro-setu",
+  "version": "0.1.0",
   "description": "hso，我都不看这些的",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dcyuki/kokkoro-plugin-setu.git"
+    "url": "git+https://github.com/kokkorojs/kokkoro-setu.git"
   },
   "keywords": [
-    "qq",
-    "bot",
-    "qqbot",
     "kokkoro"
   ],
-  "author": "dc_yuki",
+  "author": "rumicchi",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dcyuki/kokkoro-plugins-setu/issues"
+    "url": "https://github.com/kokkorojs/kokkoro-setu/issues"
   },
-  "homepage": "https://github.com/dcyuki/kokkoro-plugins-setu#readme",
-  "devDependencies": {
-    "kokkoro": "^0.0.3"
+  "homepage": "https://github.com/kokkorojs/kokkoro-setu#readme",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "node-schedule": "^2.1.0"
   }
 }
