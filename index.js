@@ -143,7 +143,7 @@ async function random(event, option) {
 
       unlink(join(`${!r18 ? r17_path : r18_path}/${setu}`))
         .then(() => {
-          logger.mark(`图片发送成功，已删除 ${image}`);
+          logger.mark(`图片发送成功，已删除 ${setu}`);
         })
         .catch(error => {
           logger.error(error.message);
@@ -159,12 +159,12 @@ async function search(event, option) {
 
   if (await smallBlackRoom.bind(this)(event, max_lsp)) return;
 
-  const tags = raw_message.slice(2, raw_message.length - 2);
+  const tags = raw_message.slice(2, raw_message.length - 2).split(' ');
   const params = {
     proxy,
     r18: Number(r18),
     size: size,
-    tags: [tags],
+    tag: [tags],
   }
 
   event.reply('图片下载中，请耐心等待喵~', true);
@@ -176,15 +176,22 @@ async function search(event, option) {
       if (error) { event.reply(error); return }
 
       const { data: setu } = response.data;
-      const { pid, uid, title, author, tags, urls } = setu[0];
 
-      const image = await message.image(urls[size], flash);
+      if (setu.length) {
+        const { pid, uid, title, author, tags, urls } = setu[0];
 
-      event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})\n标签:\n  ${tags}`);
-      event.reply(image)
-        .then(() => {
-          lsp.set(user_id, lsp.get(user_id) + 1);
-        })
+        const image = await message.image(urls[size], flash);
+
+        event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})\n标签:\n  ${tags}`);
+        event.reply(image)
+          .then(() => {
+            lsp.set(user_id, lsp.get(user_id) + 1);
+          })
+      } else {
+        event.reply(`不存在 ${tags} 标签，将随机发送本地色图`);
+
+        random(event, option);
+      }
     })
     .catch(error => {
       event.reply(error);
@@ -194,7 +201,7 @@ async function search(event, option) {
 
 const command = {
   random: /^来[点张份][涩瑟色]图$/,
-  search: /^来[点张份][\S]+[涩瑟色]图$/
+  search: /^来[点张份].+[涩瑟色]图$/
 }
 
 const default_option = {
