@@ -214,7 +214,7 @@ function listener(event) {
 
   if (option.switch) {
     mission && eval(`${mission}.bind(this)(event, option)`);
-  } else {
+  } else if (mission) {
     event.reply('不可以色色！')
   }
 }
