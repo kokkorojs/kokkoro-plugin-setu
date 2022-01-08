@@ -1,6 +1,6 @@
 {
   "name": "kokkoro-setu",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "hso，我都不看这些的",
   "main": "index.js",
   "repository": {
@@ -10,7 +10,7 @@
   "keywords": [
     "kokkoro"
   ],
-  "author": "rumicchi",
+  "author": "dc_yuki",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kokkorojs/kokkoro-setu/issues"

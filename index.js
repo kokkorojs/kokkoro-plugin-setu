@@ -1,4 +1,4 @@
-const { join } = require('path')
+const { join } = require('path');
 const { existsSync } = require('fs');
 const { writeFile, readdir, mkdir, unlink } = require('fs/promises');
 const { logger, checkCommand, message, getOption } = require('kokkoro-core');
@@ -213,10 +213,7 @@ const default_option = {
 }
 
 function listener(event) {
-  const { uin } = this;
-  const { group_id } = event;
-
-  const option = getOption(uin, group_id, 'setu');
+  const option = getOption(event);
   const mission = checkCommand(command, event.raw_message);
 
   if (option.switch) {
@@ -235,5 +232,5 @@ function disable(bot) {
 }
 
 module.exports = {
-  enable, disable, default_option
+  enable, disable, default_option,
 }
