@@ -20,8 +20,12 @@ const proxy = 'i.pixiv.re';
 const r17_path = join(__workname, `/data/images/setu/r17`);
 const r18_path = join(__workname, `/data/images/setu/r18`);
 
+let lsp_job;
+
 // 每天 5 点重置 lsp
-schedule.scheduleJob('0 0 5 * * ?', () => lsp.clear());
+function resetLsp() {
+  lsp_job = schedule.scheduleJob('0 0 5 * * ?', () => lsp.clear());
+}
 
 // #region 本地涩图数据绑定
 (async () => {
@@ -223,10 +227,12 @@ function listener(event) {
 }
 
 function enable(bot) {
+  resetLsp();
   bot.on('message.group', listener);
 }
 
 function disable(bot) {
+  lsp_job.cancel();
   bot.off('message.group', listener);
 }
 
