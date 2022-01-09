@@ -77,7 +77,7 @@ function reload() {
         proxy,
         r18: i,
         num: reload_num,
-        size: 'small',
+        size: 'regular',
       }
 
       logger.mark(`r${17 + i} 色图正在补充中...`);
@@ -95,7 +95,7 @@ function reload() {
               * 在 windows 下文件名不能包含 \ / : * ? " < > |
               * pid 与 title 之间使用 @ 符分割，title 若出现非法字符则替换为 -
               */
-            const { urls: { small: url }, uid, author, pid, title } = setu[j];
+            const { urls: { [params.size]: url }, uid, author, pid, title } = setu[j];
             const setu_name = `${uid}@${author}@${pid}@${title.replace(/(\\|\/|:|\*|\?|"|<|>|\|)/g, '-')}`;
             const setu_url = join(`${!i ? r17_path : r18_path}/${setu_name}`);
 
@@ -163,12 +163,13 @@ async function search(event, option) {
   const params = {
     proxy,
     r18: Number(r18),
-    size: size,
-    tag: [tags],
+    size: size[0],
+    tag: [],
   }
 
-  event.reply('图片下载中，请耐心等待喵~', true);
+  for (const tag of tags) params.tag.push([tag])
 
+  event.reply('图片下载中，请耐心等待喵~', true);
   axios.post(api, params)
     .then(async (response) => {
       const { error } = response;
@@ -179,8 +180,7 @@ async function search(event, option) {
 
       if (setu.length) {
         const { pid, uid, title, author, tags, urls } = setu[0];
-
-        const image = await message.image(urls[size], flash);
+        const image = await message.image(urls[size[0]], flash);
 
         event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})\n标签:\n  ${tags}`);
         event.reply(image)
@@ -208,8 +208,7 @@ const default_option = {
   max_lsp: 5,
   r18: false,
   flash: false,
-  // 'original', 'regular', 'small', 'thumb', 'mini'
-  size: 'regular',
+  size: ['regular', 'original', 'small', 'thumb', 'mini'],
 }
 
 function listener(event) {
