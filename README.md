@@ -20,13 +20,13 @@ npm i kokkoro-setu
 ``` json
 "option": {
   // 单人每日色色张数限制（每天 5 点重置，若 bot 有管理员权限直接塞口球）
-  max_lsp: 5,
+  "max_lsp": 5,
   // 看场合使用，如果你在国内且非港澳台地区就不要开了，被请喝茶我不负责
-  r18: false,
+  "r18": false,
   // 是否发送闪图
-  flash: false,
-  // 图片尺寸，有效值 ['small', 'regular', 'original'] ，从左到右依次为 "中图"、"大图"、"超大图"
-  size: regular,
+  "flash": false,
+  // 图片尺寸，有效值 ["small", "regular", "original"] ，从左到右依次为 "中图"、"大图"、"超大图"
+  "size": "regular",
 }
 ```
 
