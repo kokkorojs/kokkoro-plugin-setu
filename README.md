@@ -12,7 +12,23 @@ cd bot
 npm i kokkoro-setu
 ```
 
-在 [kokkoro](https://github.com/kokkorojs/kokkoro) 成功运行并登录后，发送 `>enable setu` 即可启用插件
+在 [kokkoro](https://github.com/kokkorojs/kokkoro) 成功运行并登录后，发送 `>enable setu` 即可启用插件  
+使用 `>setu <key> <value>` 可修改当前群聊的插件参数，例如开启默认发送闪图 `>setu flash true`
+
+## 参数
+
+``` json
+"option": {
+  // 单人每日色色张数限制（每天 5 点重置，若 bot 有管理员权限直接塞口球）
+  max_lsp: 5,
+  // 看场合使用，如果你在国内且非港澳台地区就不要开了，被请喝茶我不负责
+  r18: false,
+  // 是否发送闪图
+  flash: false,
+  // 图片尺寸，有效值 ['small', 'regular', 'original'] ，从左到右依次为 "中图"、"大图"、"超大图"
+  size: regular,
+}
+```
 
 ## 注意
 

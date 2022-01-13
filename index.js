@@ -212,14 +212,14 @@ const default_option = {
   max_lsp: 5,
   r18: false,
   flash: false,
-  size: ['regular', 'original', 'small', 'thumb', 'mini'],
+  size: ['regular', 'original', 'small'],
 }
 
 function listener(event) {
   const option = getOption(event);
   const mission = checkCommand(command, event.raw_message);
 
-  if (option.switch) {
+  if (option.apply) {
     mission && eval(`${mission}.bind(this)(event, option)`);
   } else if (mission) {
     event.reply('不可以色色！')
