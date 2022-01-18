@@ -1,7 +1,7 @@
 const { join } = require('path');
 const { existsSync } = require('fs');
 const { writeFile, readdir, mkdir, unlink } = require('fs/promises');
-const { logger, checkCommand, message, getOption } = require('kokkoro-core');
+const { logger, checkCommand, section, getOption } = require('kokkoro-core');
 
 const axios = require('axios');
 const schedule = require('node-schedule');
@@ -60,7 +60,7 @@ async function smallBlackRoom(event, max_lsp) {
   if (lsp.get(user_id) >= max_lsp) {
     this.setGroupBan(group_id, user_id, 60 * 5);
 
-    event.reply(await message.image(`${__dirname}/image/kyaru.jpg`), true);
+    event.reply(await section.image(`${__dirname}/image/kyaru.jpg`), true);
     return true;
   } else {
     return false;
@@ -137,7 +137,7 @@ async function random(event, option) {
   if (!eval(`all_setu.r${17 + r18}`).length) { event.reply('色图库存不足，请等待自动补充', true); return; }
 
   const setu = eval(`all_setu.r${17 + r18}`).pop();
-  const image = await message.image(join(`${!r18 ? r17_path : r18_path}/${setu}`), flash);
+  const image = await section.image(join(`${!r18 ? r17_path : r18_path}/${setu}`), flash);
   const [uid, author, pid, title] = setu.split('@');
 
   event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})`);
@@ -184,7 +184,7 @@ async function search(event, option) {
 
       if (setu.length) {
         const { pid, uid, title, author, tags, urls } = setu[0];
-        const image = await message.image(urls[size[0]], flash);
+        const image = await section.image(urls[size[0]], flash);
 
         event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})\n标签:\n  ${tags}`);
         event.reply(image)
