@@ -110,15 +110,15 @@ function reload() {
                     eval(`all_setu.r${17 + i}`).push(setu_name);
                     logger.mark(`setu download success, ${pid} ${title}`);
                   })
-                  .catch(error => {
-                    logger.error(error.message);
-                  })
               })
               .catch(error => {
                 logger.error(error.message);
               })
           }
-        });
+        })
+        .catch(error => {
+          logger.error(error.message);
+        })
     }
 
     reload_date = current_date;
@@ -178,7 +178,9 @@ async function search(event, option) {
     .then(async (response) => {
       const { error } = response;
 
-      if (error) { event.reply(error); return }
+      if (error) {
+        return event.reply(error)
+      }
 
       const { data: setu } = response.data;
 
@@ -188,17 +190,30 @@ async function search(event, option) {
 
         event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})\n标签:\n  ${tags}`);
         event.reply(image)
-          .then(() => {
+          .then(response => {
+            const { unsend } = option;
+
+            if (unsend > 0) {
+              const { message_id } = response;
+
+              // 撤回色图
+              setTimeout(() => {
+                this.deleteMsg(message_id)
+                  .catch(error => {
+                    this.logger.error(error.message);
+                  })
+              }, unsend * 1000);
+            }
             lsp.set(user_id, lsp.get(user_id) + 1);
           })
       } else {
         event.reply(`不存在 ${tags} 标签，将随机发送本地色图`);
-
         random(event, option);
       }
     })
     .catch(error => {
-      event.reply(error);
+      event.reply(error.message);
+      this.logger.error(error.message);
     });
 }
 // #endregion
@@ -212,6 +227,7 @@ const default_option = {
   max_lsp: 5,
   r18: false,
   flash: false,
+  unsend: 10,
   size: ['regular', 'original', 'small'],
 }
 
