@@ -142,7 +142,21 @@ async function random(event, option) {
 
   event.reply(`作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})`);
   event.reply(image)
-    .then(() => {
+    .then(response => {
+      const { unsend } = option;
+
+      if (unsend > 0) {
+        const { message_id } = response;
+
+        // 撤回色图
+        setTimeout(() => {
+          this.deleteMsg(message_id)
+            .catch(error => {
+              this.logger.error(error.message);
+            })
+        }, unsend * 1000);
+      }
+
       lsp.set(user_id, lsp.get(user_id) + 1);
 
       unlink(join(`${!r18 ? r17_path : r18_path}/${setu}`))
