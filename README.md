@@ -26,7 +26,7 @@ const option = {
   // 是否发送闪图
   flash: false,
   // 自动撤回时间（0 或以下则不撤回，单位 s）
-  unsend: 10,
+  unsend: 0,
   // 图片尺寸，有效值 ["small", "regular", "original"] ，从左到右依次为 "中图"、"大图"、"超大图"
   size: "regular",
 }
