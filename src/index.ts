@@ -1,5 +1,5 @@
-import { Client, GroupMessageEvent } from 'oicq';
-import { checkCommand, getOption } from 'kokkoro-core';
+import { GroupMessageEvent } from 'oicq';
+import { Extension, Bot, Order, Option, checkOrder, getOption } from 'kokkoro-core';
 
 import random from './random';
 import search from './search';
@@ -41,7 +41,7 @@ export interface Setu {
   urls: { [size in Size]?: string };
 }
 
-export interface Params {
+export interface SetuParam {
   // 0为非 R18，1为 R18，2为混合（在库中的分类，不等同于作品本身的 R18 标识）
   r18?: number;
   // 一次返回的结果数量，范围为1到100；在指定关键字或标签的情况下，结果数量可能会不足指定的数量
@@ -64,7 +64,7 @@ export interface Params {
   dsc?: boolean;
 }
 
-export interface SetuOption {
+export interface SetuOption extends Option {
   max_lsp: number,
   r18: boolean,
   flash: boolean,
@@ -72,42 +72,49 @@ export interface SetuOption {
   size: Size[],
 }
 
-const mission = {
-  random, search,
-}
-const command = {
-  random: /^来[点张份][涩瑟色]图$/,
-  search: /^来[点张份].+[涩瑟色]图$/,
-}
-const default_option: SetuOption = {
-  max_lsp: 5,
-  r18: false,
-  flash: false,
-  unsend: 0,
-  size: ['regular', 'original', 'small'],
-}
-
-function listener(event: GroupMessageEvent) {
-  const option = getOption(event);
-  const order = checkCommand(command, event.raw_message);
-
-  if (option.apply) {
-    order && eval(`mission[order].bind(this)(event, option)`);
-  } else if (order) {
-    event.reply('不可以色色！')
+export default class implements Extension {
+  bot: Bot;
+  option: SetuOption = {
+    lock: false,
+    apply: true,
+    max_lsp: 5,
+    r18: false,
+    flash: false,
+    unsend: 0,
+    size: ['regular', 'original', 'small'],
   }
-}
+  orders: Order[] = [
+    {
+      func: random,
+      regular: /^来[点张份][涩瑟色]图$/,
+    },
+    {
+      func: search,
+      regular: /^来[点张份].+[涩瑟色]图$/,
+    }
+  ]
 
-function enable(bot: Client) {
-  resetLsp();
-  bot.on('message.group', listener);
-}
+  constructor(bot: Bot) {
+    this.bot = bot;
+  }
 
-function disable(bot: Client) {
-  cancelSchedule();
-  bot.off('message.group', listener);
-}
+  async onInit() {
+    resetLsp();
+  }
 
-module.exports = {
-  enable, disable, default_option,
+  onDestroy() {
+    cancelSchedule();
+  }
+
+  onGroupMessage(event: GroupMessageEvent) {
+    const { raw_message, group_id } = event;
+    const option = getOption(this.bot.uin, group_id);
+    const order = checkOrder(this.orders, raw_message);
+
+    if (option.apply) {
+      order && order.func.bind(this.bot)(event, option);
+    } else if (order) {
+      event.reply('不可以色色！')
+    }
+  }
 }

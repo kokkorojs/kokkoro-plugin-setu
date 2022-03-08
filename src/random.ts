@@ -1,13 +1,13 @@
 import { join } from 'path';
 import { unlink } from 'fs/promises';
-import { logger, section } from 'kokkoro-core';
-import { Client, GroupMessageEvent } from 'oicq';
+import { logger, section, Bot } from 'kokkoro-core';
+import { GroupMessageEvent } from 'oicq';
 
 import reload from './reload';
 import { SetuOption } from '.';
 import { getAllSetu, lsp, r17_path, r18_path, smallBlackRoom } from './param';
 
-export default async function (this: Client, event: GroupMessageEvent, option: SetuOption) {
+export default async function (this: Bot, event: GroupMessageEvent, option: SetuOption) {
   reload();
 
   const all_setu = getAllSetu();

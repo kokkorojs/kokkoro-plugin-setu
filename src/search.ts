@@ -1,20 +1,20 @@
 import axios from 'axios';
-import { section } from 'kokkoro-core';
-import { Client, GroupMessageEvent } from 'oicq';
+import { section, Bot } from 'kokkoro-core';
+import { GroupMessageEvent } from 'oicq';
 
 import random from './random';
-import { Lolicon, Params, SetuOption } from '.';
+import { Lolicon, SetuParam, SetuOption } from '.';
 import { api, lsp, proxy, smallBlackRoom } from './param';
 
 // 在线搜索涩图
-export default async function (this: Client, event: GroupMessageEvent, option: SetuOption) {
+export default async function (this: Bot, event: GroupMessageEvent, option: SetuOption) {
   const { user_id, raw_message } = event;
   const { r18, flash, max_lsp, size } = option;
 
   if (await smallBlackRoom.bind(this)(event, max_lsp)) return;
 
   const tags = raw_message.slice(2, raw_message.length - 2).split(' ');
-  const params: Params = {
+  const params: SetuParam = {
     proxy,
     r18: Number(r18),
     size: [size[0]],

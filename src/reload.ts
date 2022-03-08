@@ -3,7 +3,7 @@ import { join } from 'path';
 import { logger } from 'kokkoro-core';
 import { writeFile } from 'fs/promises';
 
-import { Lolicon, Params } from ".";
+import { Lolicon, SetuParam } from ".";
 import { api, getAllSetu, max_setu, proxy, r17_path, r18_path, reload_date, reload_delay, reload_num, updateReloadDate } from './param';
 
 // 补充涩图
@@ -17,7 +17,7 @@ export default function () {
     for (let i = 0; i <= 1; i++) {
       if (eval(`all_setu.r${17 + i}`).length > max_setu) { logger.mark(`r${17 + i} 库存充足，不用补充`); continue }
 
-      const params: Params = {
+      const params: SetuParam = {
         proxy,
         r18: i,
         num: reload_num,
@@ -56,6 +56,9 @@ export default function () {
                     eval(`all_setu.r${17 + i}`).push(setu_name);
                     logger.mark(`setu download success, ${pid} ${title}`);
                   })
+              })
+              .catch(error => {
+                logger.error(error.message);
               })
           }
         })

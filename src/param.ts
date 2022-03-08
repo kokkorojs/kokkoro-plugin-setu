@@ -1,9 +1,9 @@
 import schedule from 'node-schedule';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { section } from 'kokkoro-core';
+import { section, Bot } from 'kokkoro-core';
 import { readdir, mkdir } from 'fs/promises';
-import { Client, GroupMessageEvent } from 'oicq';
+import { GroupMessageEvent } from 'oicq';
 
 import reload from './reload';
 
@@ -14,12 +14,13 @@ interface AllSetu {
 
 let lsp_job: schedule.Job;
 let lsp_meme: string[];
+const meme_path = join(__dirname, '../image');
 const all_setu: AllSetu = { r17: [], r18: [] };
 
 // 获取随机 lsp 表情包
 function getMeme(): string {
   const meme_index = Math.floor(Math.random() * lsp_meme.length);
-  const meme = `${__dirname}/image/${lsp_meme[meme_index]}`;
+  const meme = join(meme_path, lsp_meme[meme_index]);
 
   return meme;
 }
@@ -33,8 +34,8 @@ export const max_setu = 50;
 export const reload_num = 20;
 export const api = 'https://api.lolicon.app/setu/v2';
 export const proxy = 'i.pixiv.re';
-export const r17_path = join(__workname, `/data/images/setu/r17`);
-export const r18_path = join(__workname, `/data/images/setu/r18`);
+export const r17_path = join(__workname, `/data/setu/r17`);
+export const r18_path = join(__workname, `/data/setu/r18`);
 
 // 本地图片数据绑定
 (async () => {
@@ -47,11 +48,11 @@ export const r18_path = join(__workname, `/data/images/setu/r18`);
       value: await readdir(r18_path),
       writable: false
     });
-    lsp_meme = await readdir(join(__dirname, '../image'));
+    lsp_meme = await readdir(meme_path);
   } catch (error) {
-    !existsSync(join(__workname, `/data/images`)) && await mkdir(join(__workname, `/data/images`));
+    !existsSync(join(__workname, `/data`)) && await mkdir(join(__workname, `/data`));
 
-    await mkdir(join(__workname, `/data/images/setu`));
+    await mkdir(join(__workname, `/data/setu`));
     await mkdir(r17_path);
     await mkdir(r18_path);
   }
@@ -65,7 +66,7 @@ export function updateReloadDate(timestamp: number) {
 }
 
 // 关小黑屋
-export async function smallBlackRoom(this: Client, event: GroupMessageEvent, max_lsp: Number) {
+export async function smallBlackRoom(this: Bot, event: GroupMessageEvent, max_lsp: Number) {
   const { group_id, user_id } = event;
 
   // 判断 lsp 要了几张图，超过 max_lsp 张关小黑屋
