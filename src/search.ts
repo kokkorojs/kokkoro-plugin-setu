@@ -3,15 +3,14 @@ import { section, Bot } from 'kokkoro-core';
 import { GroupMessageEvent } from 'oicq';
 
 import random from './random';
-import { Lolicon, SetuParam, SetuOption } from '.';
-import { api, lsp, proxy, smallBlackRoom } from './param';
+import { api, Lolicon, lsp, proxy, SetuOption, SetuParam, smallBlackRoom } from './param';
 
 // 在线搜索涩图
 export default async function (this: Bot, event: GroupMessageEvent, option: SetuOption) {
   const { user_id, raw_message } = event;
   const { r18, flash, max_lsp, size } = option;
 
-  if (await smallBlackRoom.bind(this)(event, max_lsp)) return;
+  if (await smallBlackRoom.call(this, event, max_lsp)) return;
 
   const tags = raw_message.slice(2, raw_message.length - 2).split(' ');
   const params: SetuParam = {
@@ -57,7 +56,7 @@ export default async function (this: Bot, event: GroupMessageEvent, option: Setu
           })
       } else {
         event.reply(`不存在 ${tags} 标签，将随机发送本地色图`);
-        random.bind(this)(event, option);
+        random.call(this, event, option);
       }
     })
     .catch(error => {

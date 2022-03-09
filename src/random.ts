@@ -4,8 +4,7 @@ import { logger, section, Bot } from 'kokkoro-core';
 import { GroupMessageEvent } from 'oicq';
 
 import reload from './reload';
-import { SetuOption } from '.';
-import { getAllSetu, lsp, r17_path, r18_path, smallBlackRoom } from './param';
+import { getAllSetu, lsp, r17_path, r18_path, SetuOption, smallBlackRoom } from './param';
 
 export default async function (this: Bot, event: GroupMessageEvent, option: SetuOption) {
   reload();
@@ -14,7 +13,7 @@ export default async function (this: Bot, event: GroupMessageEvent, option: Setu
   const { user_id } = event;
   const { r18, flash, max_lsp } = option;
 
-  if (await smallBlackRoom.bind(this)(event, max_lsp)) return;
+  if (await smallBlackRoom.call(this, event, max_lsp)) return;
   if (!eval(`all_setu.r${17 + Number(r18)}`).length) return event.reply('色图库存不足，请等待自动补充', true);
 
   const setu = eval(`all_setu.r${17 + Number(r18)}`).pop();

@@ -3,8 +3,7 @@ import { join } from 'path';
 import { logger } from 'kokkoro-core';
 import { writeFile } from 'fs/promises';
 
-import { Lolicon, SetuParam } from ".";
-import { api, getAllSetu, max_setu, proxy, r17_path, r18_path, reload_date, reload_delay, reload_num, updateReloadDate } from './param';
+import { api, getAllSetu, Lolicon, max_setu, proxy, r17_path, r18_path, reload_date, reload_delay, reload_num, SetuParam, updateReloadDate } from './param';
 
 // 补充涩图
 export default function () {
