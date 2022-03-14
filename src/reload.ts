@@ -3,23 +3,22 @@ import { join } from 'path';
 import { logger } from 'kokkoro';
 import { writeFile } from 'fs/promises';
 
-import { ImageType, LoliconImage, LoliconParam } from './type';
-import { all_setu, getLoliconImages, proxy, r17_path, r18_path } from './service';
+import { SetuType, LoliconImage, LoliconParam } from './type';
+import { addSetu, getAllSetu, getLoliconImages, proxy, r17_path, r18_path } from './service';
 
 let reload_date = 0; // 色图最后补充时间
-
 const max_setu = 10;
 const reload_num = 20;
 const reload_delay = 300000; // 补充 cd（默认 5 分钟）
 
-
 // 补充涩图
 export default async function () {
+  const all_setu = getAllSetu();
   const current_date = +new Date();
 
   // 节流处理
   if (current_date - reload_date >= reload_delay) {
-    for (const type of ['r17', 'r18'] as ImageType[]) {
+    for (const type of ['r17', 'r18'] as SetuType[]) {
       const setu_length = all_setu[type].length;
 
       if (setu_length > max_setu) {
@@ -58,7 +57,7 @@ export default async function () {
             .then(response => {
               writeFile(setu_url, response.data, 'binary')
                 .then(() => {
-                  all_setu[type].push(setu_name);
+                  addSetu(type, setu_name);
                   logger.mark(`setu download success, ${pid} ${title}`);
                 })
             })

@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/kokkorojs/kokkoro-plugin-setu#readme",
   "dependencies": {
-    "axios": "^0.24.0",
     "node-schedule": "^2.1.0"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 import { Option } from 'kokkoro';
 
-export type ImageType = 'r17' | 'r18';
+export type SetuType = 'r17' | 'r18';
 
 export type LoliconSize = 'original' | 'regular' | 'small' | 'thumb' | 'mini';
 
@@ -10,11 +10,11 @@ export interface AllSetu {
 }
 
 export interface SetuOption extends Option {
-  max_lsp: number,
-  r18: boolean,
-  flash: boolean,
-  unsend: number,
-  size: LoliconSize[],
+  max_lsp: number;
+  r18: boolean;
+  flash: boolean;
+  unsend: number;
+  size: LoliconSize[];
 }
 
 export interface Lolicon {
