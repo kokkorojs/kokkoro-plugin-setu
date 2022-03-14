@@ -9,7 +9,7 @@
 cd bot
 
 # 安装 npm 包
-npm i kokkoro-setu
+npm i kokkoro-plugin-setu
 ```
 
 在 [kokkoro](https://github.com/kokkorojs/kokkoro) 成功运行并登录后，发送 `>enable setu` 即可启用插件  

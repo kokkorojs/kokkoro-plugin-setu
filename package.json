@@ -1,11 +1,11 @@
 {
-  "name": "kokkoro-setu",
-  "version": "0.2.2",
+  "name": "kokkoro-plugin-setu",
+  "version": "0.1.0",
   "description": "hso，我都不看这些的",
   "main": "./lib/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kokkorojs/kokkoro-setu.git"
+    "url": "git+https://github.com/kokkorojs/kokkoro-plugin-setu.git"
   },
   "keywords": [
     "kokkoro"
@@ -13,9 +13,9 @@
   "author": "yuki",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kokkorojs/kokkoro-setu/issues"
+    "url": "https://github.com/kokkorojs/kokkoro-plugin-setu/issues"
   },
-  "homepage": "https://github.com/kokkorojs/kokkoro-setu#readme",
+  "homepage": "https://github.com/kokkorojs/kokkoro-plugin-setu#readme",
   "dependencies": {
     "axios": "^0.24.0",
     "node-schedule": "^2.1.0"
@@ -23,7 +23,7 @@
   "devDependencies": {
     "@types/node": "^17.0.10",
     "@types/node-schedule": "^1.3.2",
-    "kokkoro-core": "^0.1.6"
+    "kokkoro": "^0.2.0"
   },
   "files": [
     "lib",

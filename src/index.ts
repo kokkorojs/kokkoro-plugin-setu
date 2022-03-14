@@ -1,9 +1,10 @@
 import { GroupMessageEvent } from 'oicq';
-import { Extension, Bot, Order, getOrder, getOption } from 'kokkoro-core';
+import { Extension, Bot, Order, getOrder, getOption } from 'kokkoro';
 
-import random from './random';
 import search from './search';
-import { cancelSchedule, resetLsp, SetuOption } from './param';
+import random from './random';
+import { SetuOption } from './type';
+import { cancelSchedule, resetLsp } from './service';
 
 export default class implements Extension {
   bot: Bot;
