@@ -1,10 +1,9 @@
 import { Option } from 'kokkoro';
 
 export type SetuType = 'r17' | 'r18';
-
 export type LoliconSize = 'original' | 'regular' | 'small' | 'thumb' | 'mini';
 
-export interface AllSetu {
+export interface SetuList {
   r17: string[];
   r18: string[];
 }
