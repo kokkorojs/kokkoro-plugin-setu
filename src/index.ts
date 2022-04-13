@@ -14,7 +14,7 @@ export const option: SetuOption = {
   unsend: 0,
   size: ['regular', 'original', 'small'],
 };
-export const plugin = new Plugin('setu', option);
+export const plugin = new Plugin('setu', option).version(require('../package.json').version);
 
 plugin.schedule('0 0 5 * * ?', clearLspList);
 
