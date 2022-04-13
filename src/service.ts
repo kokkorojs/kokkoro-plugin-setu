@@ -6,6 +6,7 @@ import { logger, Bot } from 'kokkoro';
 import { GroupMessageEvent, segment } from 'oicq';
 
 import { SetuType, SetuList, Lolicon, LoliconImage, LoliconParam, SetuOption } from './types';
+import { option } from '.';
 
 export const proxy = 'i.pixiv.re';
 export const api = 'https://api.lolicon.app/setu/v2';
@@ -15,7 +16,6 @@ export const r18_path = join(__workname, `/data/setu/r18`);
 // 色图最后补充时间
 let reload_date = 0;
 
-const max_setu = 10;
 const reload_num = 20;
 // 补充 cd（默认 5 分钟）
 const reload_delay = 300000;
@@ -38,11 +38,11 @@ const setu_list: SetuList = { r17: [], r18: [] };
     await mkdir(r18_path);
   }
 
-  reloadSetu();
+  reloadSetu(option.max_setu);
 })();
 
 // 补充涩图
-async function reloadSetu() {
+async function reloadSetu(max_setu: number) {
   const all_setu = getSetuList();
   const current_date = +new Date();
 
@@ -175,8 +175,8 @@ export function addSetu(type: SetuType, setu: string) {
 }
 
 // 获取随机涩图
-export async function getRandomSetu(r18: boolean, flash: boolean) {
-  reloadSetu();
+export async function getRandomSetu(r18: boolean, flash: boolean, max_setu: number) {
+  reloadSetu(max_setu);
 
   const setu_list = getSetuList();
   const type = `r${+r18 + 17}` as SetuType;
