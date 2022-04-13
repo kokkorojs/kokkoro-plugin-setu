@@ -10,7 +10,6 @@ export interface SetuList {
 
 export interface SetuOption extends Option {
   max_lsp: number;
-  max_setu: number;
   r18: boolean;
   flash: boolean;
   unsend: number;

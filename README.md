@@ -21,8 +21,6 @@ npm i kokkoro-plugin-setu
 interface SetuOption {
   // 单人每日色色张数限制（每天 5 点重置）
   max_lsp: number;
-  // 色图库存最大数量（默认 50 张）
-  max_setu: number;
   // 看场合使用，如果你在国内且非港澳台地区就不要开了，被请喝茶我不负责
   r18: boolean;
   // 是否发送闪图（默认 true）

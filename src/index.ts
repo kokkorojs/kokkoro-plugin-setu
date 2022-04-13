@@ -8,7 +8,6 @@ export const option: SetuOption = {
   apply: true,
   lock: false,
   max_lsp: 5,
-  max_setu: 50,
   r18: false,
   flash: true,
   unsend: 0,
@@ -26,13 +25,13 @@ plugin
     this.event.reply('不可以色色！');
   })
   .action(function () {
-    const { r18, flash, max_lsp, unsend, max_setu } = this.option as SetuOption;
+    const { r18, flash, max_lsp, unsend } = this.option as SetuOption;
     const isBan = smallBlackRoom(this.bot, this.event, max_lsp);
 
     if (isBan) {
       return;
     }
-    getRandomSetu(r18, flash, max_setu)
+    getRandomSetu(r18, flash)
       .then(setu_info => {
         const { image, image_info, setu_url, setu_file } = setu_info;
 
