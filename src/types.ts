@@ -62,7 +62,7 @@ export interface LoliconParam {
   // 返回匹配指定标签的作品，详见下文
   tag?: string[] | string[][];
   // 返回指定图片规格的地址
-  size?: LoliconSize[];
+  size?: LoliconSize[] | LoliconSize;
   // 设置图片地址所使用的在线反代服务
   proxy?: string;
   // 返回在这个时间及以后上传的作品；时间戳，单位为毫秒

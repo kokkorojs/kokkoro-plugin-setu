@@ -1,6 +1,6 @@
 {
   "name": "kokkoro-plugin-setu",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "hso，我都不看这些的",
   "main": "./lib/index.js",
   "repository": {
@@ -18,7 +18,7 @@
   "homepage": "https://github.com/kokkorojs/kokkoro-plugin-setu#readme",
   "devDependencies": {
     "@types/node": "^17.0.23",
-    "kokkoro": "^0.3.0"
+    "kokkoro": "^0.3.2"
   },
   "files": [
     "lib",

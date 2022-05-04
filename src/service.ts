@@ -6,9 +6,9 @@ import { logger, Bot } from 'kokkoro';
 import { GroupMessageEvent, segment } from 'oicq';
 
 import { SetuType, SetuList, Lolicon, LoliconImage, LoliconParam, SetuOption } from './types';
-import { option } from '.';
 
-export const proxy = 'i.pixiv.re';
+// 代理可以拿去用，省着点就行
+export const proxy = 'pixiv.yuki.sh';
 export const api = 'https://api.lolicon.app/setu/v2';
 export const r17_path = join(__workname, `/data/setu/r17`);
 export const r18_path = join(__workname, `/data/setu/r18`);
@@ -61,7 +61,7 @@ async function reloadSetu() {
         proxy,
         r18: type === 'r17' ? 0 : 1,
         num: reload_num,
-        size: ['regular'],
+        size: 'regular',
       }
       logger.mark(`${type} 色图正在补充中...`);
 
@@ -203,7 +203,7 @@ export async function getSearchSetu(tags: string[], option: SetuOption) {
   const param: LoliconParam = {
     proxy,
     r18: +r18,
-    size: [size[0]],
+    size: size[0],
     tag: [tags],
   };
 

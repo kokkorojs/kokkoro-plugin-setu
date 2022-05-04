@@ -4,7 +4,7 @@ import { unlink } from 'fs/promises';
 import { SetuOption } from './types';
 import { clearLspList, getRandomSetu, getSearchSetu, smallBlackRoom, unsendSetu } from './service';
 
-export const option: SetuOption = {
+const option: SetuOption = {
   apply: true,
   lock: false,
   max_lsp: 5,
