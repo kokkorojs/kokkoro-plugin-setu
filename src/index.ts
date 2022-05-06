@@ -91,5 +91,7 @@ plugin
       })
       .catch(error => {
         this.event.reply(error.message);
+        this.event.raw_message = '来点色图';
+        this.bot.emit('message', this.event);
       })
   });
