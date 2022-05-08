@@ -22,13 +22,13 @@ const reload_num = 20;
 const reload_delay = 300000;
 const lsp_meme: string[] = [];
 const lsp_list: Map<number, number> = new Map();
-const meme_path = join(__dirname, '../image');
+const images_path = join(__dirname, '../images');
 const setu_list: SetuList = { r17: [], r18: [] };
 
 // 初始化数据
 (async () => {
   try {
-    lsp_meme.push(...await readdir(meme_path));
+    lsp_meme.push(...await readdir(images_path));
     setu_list.r17 = await readdir(r17_path);
     setu_list.r18 = await readdir(r18_path);
   } catch (error) {
@@ -154,7 +154,7 @@ export function getLoliconImages(param: LoliconParam): Promise<LoliconImage[]> {
 // 获取随机 lsp 表情包
 export function getMeme(): string {
   const meme_index = Math.floor(Math.random() * lsp_meme.length);
-  const meme = join(meme_path, lsp_meme[meme_index]);
+  const meme = join(images_path, lsp_meme[meme_index]);
 
   return meme;
 }

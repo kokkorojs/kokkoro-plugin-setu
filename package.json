@@ -18,10 +18,10 @@
   "homepage": "https://github.com/kokkorojs/kokkoro-plugin-setu#readme",
   "devDependencies": {
     "@types/node": "^17.0.23",
-    "kokkoro": "^0.3.2"
+    "kokkoro": "^0.3.3"
   },
   "files": [
     "lib",
-    "image"
+    "images"
   ]
 }
