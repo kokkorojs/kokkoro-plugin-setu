@@ -2,8 +2,8 @@ import axios from 'axios';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { readdir, mkdir, writeFile } from 'fs/promises';
-import { logger, Bot } from 'kokkoro';
-import { GroupMessageEvent, segment } from 'oicq';
+import { GroupMessageEvent } from 'oicq';
+import { logger, Bot, segment } from 'kokkoro';
 
 import { SetuType, SetuList, Lolicon, LoliconImage, LoliconParam, SetuOption } from './types';
 
@@ -188,12 +188,11 @@ export async function getRandomSetu(r18: boolean, flash: boolean) {
   const setu_file = getSetu(type)!;
   const setu_path = type === 'r17' ? r17_path : r18_path;
   const setu_url = join(setu_path, setu_file);
-  const image = flash ? segment.flash(setu_url) : segment.image(setu_url);
   const [uid, author, pid, title] = setu_file.split('@');
   const image_info = `作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})`;
 
   return {
-    image_info, image, setu_url, setu_file,
+    image_info, flash, setu_url, setu_file,
   };
 }
 
@@ -214,12 +213,11 @@ export async function getSearchSetu(tags: string[], option: SetuOption) {
     if (images_length) {
       const { pid, uid, title, author, tags, urls } = images[0];
       const setu_url = urls[size[0]];
-      const image = flash ? segment.flash(setu_url) : segment.image(setu_url);
       const image_info = `作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})\n标签:\n  ${tags}`;
 
-      return { image_info, image };
+      return { image_info, setu_url, flash };
     } else {
-      throw new Error(`不存在 ${tags} 标签，将随机发送本地色图`);
+      throw new Error(`不存在 ${tags} 标签`);
     }
   } catch (error) {
     throw error;

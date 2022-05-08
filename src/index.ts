@@ -22,7 +22,7 @@ plugin
   .description('随机发送本地涩图')
   .sugar(/^来[点张份][涩瑟色]图$/)
   .prevent(function () {
-    this.event.reply('不可以色色！');
+    this.reply('不可以色色！');
   })
   .action(function () {
     const { r18, flash, max_lsp, unsend } = this.option as SetuOption;
@@ -33,10 +33,10 @@ plugin
     }
     getRandomSetu(r18, flash)
       .then(setu_info => {
-        const { image, image_info, setu_url, setu_file } = setu_info;
+        const { setu_url, image_info, setu_file } = setu_info;
 
-        this.event.reply(image_info);
-        this.event.reply(image)
+        this.reply(image_info);
+        this.replyImage(setu_url, flash)
           .then(message_ret => {
             const send_info = {
               unsend,
@@ -54,32 +54,32 @@ plugin
           })
       })
       .catch(error => {
-        this.event.reply(error.message);
+        this.reply(error.message);
       })
   });
 
 plugin
   .command('search <...tags>', 'group')
-  .description('随机发送本地涩图')
+  .description('检索在线涩图')
   .sugar(/^来[点张份](?<tags>.+)[涩瑟色]图$/)
   .prevent(function () {
-    this.event.reply('不可以色色！');
+    this.reply('不可以色色！');
   })
   .action(function (tags: string[]) {
-    const { max_lsp, unsend } = this.option as SetuOption;;
+    const { max_lsp, unsend, flash } = this.option as SetuOption;;
     const isBan = smallBlackRoom(this.bot, this.event, max_lsp);
 
     if (isBan) {
       return;
     }
-    this.event.reply('图片下载中，请耐心等待喵~', true);
+    this.reply('图片检索中，请耐心等待喵~', true);
 
     getSearchSetu(tags, this.option as SetuOption)
       .then(setu_info => {
-        const { image, image_info } = setu_info;
+        const { setu_url, image_info } = setu_info;
 
-        this.event.reply(image_info);
-        return this.event.reply(image);
+        this.reply(image_info);
+        return this.replyImage(setu_url, flash);
       })
       .then(message_ret => {
         const send_info = {
@@ -90,8 +90,7 @@ plugin
         unsendSetu(this.bot, send_info);
       })
       .catch(error => {
-        this.event.reply(error.message);
-        this.event.raw_message = '来点色图';
-        this.bot.emit('message', this.event);
+        this.reply(`${error.message}\n将随机发送本地色图`);
+        this.rewrite('来点色图');
       })
   });
