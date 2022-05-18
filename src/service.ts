@@ -2,8 +2,8 @@ import axios from 'axios';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { readdir, mkdir, writeFile } from 'fs/promises';
-import { GroupMessageEvent } from 'oicq';
-import { logger, Bot, segment } from 'kokkoro';
+import { logger, Bot } from 'kokkoro';
+import { GroupMessageEvent, segment } from 'oicq';
 
 import { SetuType, SetuList, Lolicon, LoliconImage, LoliconParam, SetuOption } from './types';
 
