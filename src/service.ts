@@ -97,6 +97,7 @@ export class SetuService extends EventEmitter {
     r17: string[];
     r18: string[];
   };
+  reload: () => void;
 
   constructor(
     /** 代理地址 */
@@ -105,14 +106,15 @@ export class SetuService extends EventEmitter {
     super();
 
     this.api = 'https://api.lolicon.app/setu/v2';
-    this.max_setu = 50;
-    this.reload_num = 20;
+    this.max_setu = 500;
+    this.reload_num = 50;
     this.reload_delay = 300000;
     this.memes = [];
     this.lspMap = new Map();
     this.imageList = { r17: [], r18: [] };
 
     this.init();
+    this.reload = this.reloadSetu();
     this.once('setu.send.success', (bot, url, file) => {
       unlink(url)
         .then(() => {
@@ -137,16 +139,16 @@ export class SetuService extends EventEmitter {
       await mkdir(r18_path);
     }
 
-    this.reloadSetu();
+    this.reload();
   }
 
   /**
    * 补充色图
    */
-  public reloadSetu() {
+  private reloadSetu() {
     return throttle(async () => {
-      for (let i = 0; i < 1; i++) {
-        const type = i ? 'r17' : 'r18';
+      for (let i = 0; i < 2; i++) {
+        const type = !i ? 'r17' : 'r18';
         const list_length = this.imageList[type].length;
 
         if (list_length > this.max_setu) {
@@ -273,7 +275,7 @@ export class SetuService extends EventEmitter {
    * @returns 色图信息
    */
   public getRandomSetu(r18: boolean, flash: boolean = false) {
-    this.reloadSetu();
+    this.reload();
 
     const setus = this.getSetus(r18);
     const setus_length = setus.length;
