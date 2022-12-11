@@ -107,7 +107,7 @@ export class SetuService extends EventEmitter {
 
     this.api = 'https://api.lolicon.app/setu/v2';
     this.max_setu = 500;
-    this.reload_num = 50;
+    this.reload_num = 20;
     this.reload_delay = 300000;
     this.memes = [];
     this.lspMap = new Map();
