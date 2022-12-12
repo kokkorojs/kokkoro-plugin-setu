@@ -1,5 +1,4 @@
 import { join } from 'path';
-import { Forwardable } from 'oicq';
 import { Plugin, Option } from 'kokkoro';
 import { createImage } from '@kokkoro/utils';
 
@@ -32,7 +31,7 @@ const option: SetuOption = {
 };
 const { version } = require('../package.json');
 const plugin = new Plugin('setu', option);
-const service = new SetuService('pixiv.yuki.sh');
+const service = new SetuService(process.env.SETU_PROXY);
 
 plugin
   .version(version)
@@ -150,7 +149,7 @@ plugin
       const ran = Math.floor(Math.random() * setus.length);
       images.push(setus.splice(ran, 1)[0]);
     };
-    const forwardMessage: Forwardable[] = [];
+    const forwardMessage = [];
 
     for (let i = 0; i < number; i++) {
       const setu_file = images[i];
@@ -159,7 +158,7 @@ plugin
       const [uid, author, pid, title] = setu_file.split('@');
       const image_info = `作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})`;
       const image = await createImage(setu_url);
-      const message: Forwardable = {
+      const message = {
         message: [image_info, '\n', image],
         user_id: ctx.self_id,
         nickname: ctx.bot.nickname,

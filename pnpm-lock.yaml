@@ -4,13 +4,13 @@ specifiers:
   '@kokkoro/utils': ^0.1.5
   '@types/node': ^18.11.13
   axios: ^1.2.1
-  kokkoro: ^1.2.3
+  kokkoro: ^1.2.5
 
 devDependencies:
   '@kokkoro/utils': 0.1.5
   '@types/node': 18.11.13
   axios: 1.2.1
-  kokkoro: 1.2.3
+  kokkoro: 1.2.5
 
 packages:
 
@@ -102,6 +102,11 @@ packages:
     engines: {node: '>=0.4.0'}
     dev: true
 
+  /dotenv/16.0.3:
+    resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
+    engines: {node: '>=12'}
+    dev: true
+
   /flatted/3.2.7:
     resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
     dev: true
@@ -151,12 +156,13 @@ packages:
       graceful-fs: 4.2.10
     dev: true
 
-  /kokkoro/1.2.3:
-    resolution: {integrity: sha512-TahLkIvubn+kX9waC95jM8ASdJ3W+cnrDH6o0aow15pi0SI/DdreYhmPMyAkZQ4j0BWw5uSa8pNSy/+GIDFamA==}
+  /kokkoro/1.2.5:
+    resolution: {integrity: sha512-g9jCWsoE8s8DaWF2M1223TKGvwb/Thbugz16C+MwzYgzyE+muZ/vcXVemW0pOdgS7eC6u9rXvs5sv4BpiB5MPw==}
     engines: {node: '>= v15'}
     dependencies:
       '@kokkoro/utils': 0.1.5
       cron: 2.1.0
+      dotenv: 16.0.3
       oicq: 2.3.1
     transitivePeerDependencies:
       - debug

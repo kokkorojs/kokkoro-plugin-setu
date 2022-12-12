@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { join } from 'path';
-import { segment } from 'oicq';
 import { EventEmitter } from 'events';
+import { segment } from 'oicq';
 import { Bot, logger, Context } from 'kokkoro';
 import { existsSync } from 'fs';
 import { readdir, mkdir, writeFile, unlink } from 'fs/promises';
@@ -69,7 +69,7 @@ interface LoliconParam {
 }
 
 interface UnsendInfo {
-  /** 茶会时间 */
+  /** 撤回时间 */
   unsend: number;
   /** 用户 id */
   user_id: number;
@@ -106,9 +106,9 @@ export class SetuService extends EventEmitter {
     super();
 
     this.api = 'https://api.lolicon.app/setu/v2';
-    this.max_setu = 500;
+    this.max_setu = Number(process.env.SETU_COUNT ?? 500);
     this.reload_num = 20;
-    this.reload_delay = 300000;
+    this.reload_delay = Number(process.env.SETU_DELAY ?? 300000);
     this.memes = [];
     this.lspMap = new Map();
     this.imageList = { r17: [], r18: [] };

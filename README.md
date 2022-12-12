@@ -12,7 +12,7 @@ cd bot
 npm i kokkoro-plugin-setu
 ```
 
-## 参数
+## 配置项
 
 ```typescript
 interface SetuOption extends Option {
@@ -29,6 +29,19 @@ interface SetuOption extends Option {
   /** 图片反和谐 */
   // anti_harmony: boolean;
 }
+```
+
+## 环境变量
+
+你可以在项目根目录下创建 `.env` 文件
+
+```ini
+# Pixiv 代理地址
+SETU_PROXY=i.pixiv.re
+# 本地图片缓存总数
+SETU_COUNT=500
+# 补充图片间隔 (ms)
+SETU_DELAY=300000
 ```
 
 ## 注意
