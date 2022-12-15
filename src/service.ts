@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { join } from 'path';
 import { EventEmitter } from 'events';
-import { segment } from 'oicq';
-import { Bot, logger, Context } from 'kokkoro';
+import { Bot, Context, Logger, segment } from 'kokkoro';
 import { existsSync } from 'fs';
 import { readdir, mkdir, writeFile, unlink } from 'fs/promises';
 
@@ -100,8 +99,10 @@ export class SetuService extends EventEmitter {
   reload: () => void;
 
   constructor(
+    /** 日志 */
+    private logger: Logger,
     /** 代理地址 */
-    private proxy: string = 'i.pixiv.re'
+    private proxy: string = 'i.pixiv.re',
   ) {
     super();
 
@@ -115,13 +116,13 @@ export class SetuService extends EventEmitter {
 
     this.init();
     this.reload = this.reloadSetu();
-    this.once('setu.send.success', (bot, url, file) => {
+    this.on('setu.send.success', (bot, url, file) => {
       unlink(url)
         .then(() => {
-          bot.logger.mark(`图片发送成功，已删除 ${file}`);
+          this.logger.mark(`图片发送成功，已删除 ${file}`);
         })
         .catch((error) => {
-          bot.logger.error(error.message);
+          this.logger.error(error.message);
         });
     });
   }
@@ -152,7 +153,7 @@ export class SetuService extends EventEmitter {
         const list_length = this.imageList[type].length;
 
         if (list_length > this.max_setu) {
-          logger.mark(`${type} 库存充足，不用补充`);
+          this.logger.mark(`${type} 库存充足，不用补充`);
           continue;
         }
 
@@ -162,7 +163,7 @@ export class SetuService extends EventEmitter {
           num: this.reload_num,
           size: ['regular'],
         };
-        logger.mark(`${type} 色图正在补充中...`);
+        this.logger.mark(`${type} 色图正在补充中...`);
 
         try {
           const images = await this.getLoliconImages(param);
@@ -192,17 +193,17 @@ export class SetuService extends EventEmitter {
                 .then((response) => writeFile(setu_url, response.data, 'binary'))
                 .then(() => {
                   this.imageList[type].push(setu_name);
-                  logger.debug(`setu write success, ${pid} ${title}`);
+                  this.logger.debug(`setu write success, ${pid} ${title}`);
                 })
                 .catch((error) => {
-                  logger.error(`setu write error, ${error.message}`);
+                  this.logger.error(`setu write error, ${error.message}`);
                 })
             );
           }
           await Promise.allSettled(taskQueue);
-          logger.mark(`${type} 色图补充完毕`);
+          this.logger.mark(`${type} 色图补充完毕`);
         } catch (error) {
-          logger.error(`获取 ${type} 色图失败，${(<Error>error).message}`);
+          this.logger.error(`获取 ${type} 色图失败，${(<Error>error).message}`);
         }
       }
     }, this.reload_delay);
@@ -250,7 +251,7 @@ export class SetuService extends EventEmitter {
       const { error } = data as LoliconResult;
 
       if (error) {
-        logger.error(error);
+        this.logger.error(error);
         throw new Error(error);
       }
       return data.data;
@@ -271,10 +272,9 @@ export class SetuService extends EventEmitter {
    * 获取随机涩图
    *
    * @param r18 - 是否 r18
-   * @param flash - 是否闪图，默认 false
    * @returns 色图信息
    */
-  public getRandomSetu(r18: boolean, flash: boolean = false) {
+  public getRandomSetu(r18: boolean) {
     this.reload();
 
     const setus = this.getSetus(r18);
@@ -290,7 +290,6 @@ export class SetuService extends EventEmitter {
 
     return {
       image_info,
-      flash,
       setu_url,
       setu_file,
     };

@@ -20,8 +20,6 @@ interface SetuOption extends Option {
   max_lsp: number;
   /** 开启 R18 */
   r18: boolean;
-  /** 是否发送闪图 */
-  flash: boolean;
   /** 自动撤回（0 或以下则不撤回，单位 s） */
   unsend: number;
   /** 图片尺寸 */

@@ -1,6 +1,5 @@
 import { join } from 'path';
-import { Plugin, Option } from 'kokkoro';
-import { createImage } from '@kokkoro/utils';
+import { Plugin, Option, segment } from 'kokkoro';
 
 import { LoliconSize, r17_path, r18_path, SetuService } from './service';
 
@@ -9,8 +8,6 @@ export interface SetuOption extends Option {
   max_lsp: number;
   /** 开启 R18 */
   r18: boolean;
-  /** 是否发送闪图 */
-  flash: boolean;
   /** 自动撤回（0 或以下则不撤回，单位 s） */
   unsend: number;
   /** 图片尺寸 */
@@ -24,14 +21,13 @@ const option: SetuOption = {
   lock: false,
   max_lsp: 5,
   r18: false,
-  flash: true,
   unsend: 0,
   size: ['regular', 'original', 'small'],
   // anti_harmony: true,
 };
 const { version } = require('../package.json');
 const plugin = new Plugin('setu', option);
-const service = new SetuService(process.env.SETU_PROXY);
+const service = new SetuService(plugin.logger, process.env.SETU_PROXY);
 
 plugin
   .version(version)
@@ -41,22 +37,22 @@ plugin
   .command('random', 'group')
   .description('随机发送本地涩图')
   .sugar(/^来[点张份][涩瑟色]图$/)
-  .prevent(ctx => {
-    ctx.reply('不可以色色！', true);
+  .prevent(async (ctx) => {
+    await ctx.reply('不可以色色！', true);
   })
-  .action(ctx => {
+  .action(async (ctx) => {
     const { option, bot, sender } = ctx;
-    const { r18, flash, unsend } = option as SetuOption;
+    const { r18, unsend } = option as SetuOption;
     const is_ban = service.smallBlackRoom(ctx);
 
     if (is_ban) {
       return;
     }
-    const setuInfo = service.getRandomSetu(r18, flash);
+    const setuInfo = service.getRandomSetu(r18);
     const { setu_url, image_info, setu_file } = setuInfo;
 
-    ctx.reply(image_info)
-      .then(() => createImage(setu_url, flash))
+    await ctx.reply(image_info)
+      .then(() => segment.image(setu_url))
       .then(image => ctx.reply([image]))
       .then((message_ret) => {
         const sendInfo = {
@@ -65,9 +61,8 @@ plugin
           message_id: message_ret.message_id,
         };
         service.unsendSetu(bot, sendInfo);
-        service.emit('setu.send.success',bot, setu_url, setu_file);
+        service.emit('setu.send.success', bot, setu_url, setu_file);
       })
-      .catch(error => ctx.reply(error.message))
   });
 
 plugin
@@ -80,7 +75,7 @@ plugin
   .action((ctx) => {
     const { option, bot, query, sender } = ctx;
     const { tags } = query;
-    const { unsend, flash, r18 } = option as SetuOption;
+    const { unsend, r18 } = option as SetuOption;
     const is_ban = service.smallBlackRoom(ctx);
 
     if (is_ban) {
@@ -92,7 +87,7 @@ plugin
         const { setu_url, image_info } = setu_info;
 
         await ctx.reply(image_info);
-        return createImage(setu_url!, flash);
+        return segment.image(setu_url!);
       })
       .then(image => ctx.reply([image]))
       .then((message_ret) => {
@@ -104,11 +99,11 @@ plugin
         service.unsendSetu(bot, sendInfo);
       })
       .catch(async (error) => {
-        const { setu_url, image_info, setu_file } = service.getRandomSetu(r18, flash);
+        const { setu_url, image_info, setu_file } = service.getRandomSetu(r18);
 
         ctx.reply(`Error: ${error.message}\n将为你随机发送本地色图`)
           .then(() => ctx.reply(image_info))
-          .then(() => createImage(setu_url, flash))
+          .then(() => segment.image(setu_url))
           .then(image => ctx.reply([image]))
           .then((message_ret) => {
             const sendInfo = {
@@ -117,7 +112,7 @@ plugin
               message_id: message_ret.message_id,
             };
             service.unsendSetu(bot, sendInfo);
-            service.emit('setu.send.success',bot, setu_url, setu_file);
+            service.emit('setu.send.success', bot, setu_url, setu_file);
           })
           .catch(error => ctx.reply(error.message))
       });
@@ -157,9 +152,8 @@ plugin
       const setu_url = join(setu_path, setu_file);
       const [uid, author, pid, title] = setu_file.split('@');
       const image_info = `作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})`;
-      const image = await createImage(setu_url);
       const message = {
-        message: [image_info, '\n', image],
+        message: [image_info, '\n', segment.image(setu_url)],
         user_id: ctx.self_id,
         nickname: ctx.bot.nickname,
       };
