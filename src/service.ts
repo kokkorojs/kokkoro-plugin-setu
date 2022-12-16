@@ -1,12 +1,11 @@
 import axios from 'axios';
 import { join } from 'path';
 import { EventEmitter } from 'events';
-import { Bot, Context, Logger, segment } from 'kokkoro';
 import { existsSync } from 'fs';
 import { readdir, mkdir, writeFile, unlink } from 'fs/promises';
+import { Bot, Context, Logger, segment, throttle } from 'kokkoro';
 
 import { SetuOption } from '.';
-import { throttle } from '@kokkoro/utils';
 
 export type LoliconSize = 'original' | 'regular' | 'small' | 'thumb' | 'mini';
 

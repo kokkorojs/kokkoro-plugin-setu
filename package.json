@@ -17,10 +17,9 @@
   },
   "homepage": "https://github.com/kokkorojs/kokkoro-plugin-setu#readme",
   "devDependencies": {
-    "@kokkoro/utils": "^0.1.5",
     "@types/node": "^18.11.15",
     "axios": "^1.2.1",
-    "kokkoro": "^1.2.7"
+    "kokkoro": "^1.2.9"
   },
   "files": [
     "lib",
