@@ -11,7 +11,7 @@ export interface SetuOption extends Option {
   /** 自动撤回（0 或以下则不撤回，单位 s） */
   unsend: number;
   /** 图片尺寸 */
-  size: LoliconSize[];
+  size: LoliconSize;
   /** 图片反和谐 */
   // anti_harmony: boolean;
 }
@@ -22,7 +22,8 @@ const option: SetuOption = {
   max_lsp: 5,
   r18: false,
   unsend: 0,
-  size: ['regular', 'original', 'small'],
+  // ['regular', 'original', 'small']
+  size: 'regular',
   // anti_harmony: true,
 };
 const { version } = require('../package.json');
@@ -133,7 +134,7 @@ plugin
 
     if (is_ban) {
       return;
-    }else if(number > 10){
+    } else if (number > 10) {
       return ctx.reply(`数量不能大于 10，人别冲死了`);
     }
     // 多张转发不删除本地图片

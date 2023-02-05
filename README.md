@@ -23,7 +23,7 @@ interface SetuOption extends Option {
   /** 自动撤回（0 或以下则不撤回，单位 s） */
   unsend: number;
   /** 图片尺寸 */
-  size: LoliconSize[];
+  size: 'original' | 'regular' | 'small' | 'thumb' | 'mini';
   /** 图片反和谐 */
   // anti_harmony: boolean;
 }

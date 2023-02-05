@@ -3,9 +3,11 @@ import { join } from 'path';
 import { EventEmitter } from 'events';
 import { existsSync } from 'fs';
 import { readdir, mkdir, writeFile, unlink } from 'fs/promises';
-import { Bot, Context, Logger, segment, throttle } from 'kokkoro';
+import { throttle } from '@kokkoro/utils';
+import { Bot, Logger, segment } from 'kokkoro';
 
 import { SetuOption } from '.';
+import { Context } from 'kokkoro/lib/events';
 
 export type LoliconSize = 'original' | 'regular' | 'small' | 'thumb' | 'mini';
 
@@ -222,7 +224,7 @@ export class SetuService extends EventEmitter {
     // 判断 lsp 要了几张图，超过 max_lsp 张关小黑屋
     !this.lspMap.has(user_id) && this.lspMap.set(user_id, 0);
 
-    if (this.lspMap.get(user_id)! >= max_lsp) {
+    if (this.lspMap.get(user_id)! >= <number>max_lsp) {
       const meme = this.getNotEroMeme();
       const image = segment.image(meme);
 
@@ -307,7 +309,7 @@ export class SetuService extends EventEmitter {
     const param: LoliconParam = {
       proxy: this.proxy,
       r18: <0 | 1>+r18,
-      size,
+      size: [size],
       tag: [tags],
     };
 
