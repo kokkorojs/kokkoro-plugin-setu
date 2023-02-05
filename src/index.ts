@@ -32,7 +32,7 @@ const service = new SetuService(plugin.logger, process.env.SETU_PROXY);
 
 plugin
   .version(version)
-  .schedule('0 0 5 * *', service.clearLspMap);
+  .schedule('0 0 5 * *', () => service.clearLspMap())
 
 plugin
   .command('random', 'group')
@@ -64,7 +64,7 @@ plugin
         service.unsendSetu(bot, sendInfo);
         service.emit('setu.send.success', bot, setu_url, setu_file);
       })
-  });
+  })
 
 plugin
   .command('search <...tags>', 'group')
@@ -117,7 +117,7 @@ plugin
           })
           .catch(error => ctx.reply(error.message))
       });
-  });
+  })
 
 plugin
   .command('multi <number>', 'group')
@@ -165,4 +165,5 @@ plugin
       .makeForwardMsg(forwardMessage)
       .then(xml => ctx.reply(xml))
       .catch(error => ctx.reply(error.message))
-  });
+  })
+
