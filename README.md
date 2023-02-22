@@ -42,6 +42,8 @@ SETU_COUNT=500
 SETU_DELAY=300000
 ```
 
+因为插件的 Service 是在初始化时创建的，所以如果你修改了相关变量，需要使用 `reload` 指令将其重新挂载才能生效。
+
 ## 注意
 
 - 图片来源 p 站，相关版权归 [pixiv](https://www.pixiv.net/) 及画师所属

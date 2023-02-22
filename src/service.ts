@@ -3,11 +3,12 @@ import { join } from 'path';
 import { EventEmitter } from 'events';
 import { existsSync } from 'fs';
 import { readdir, mkdir, writeFile, unlink } from 'fs/promises';
+import { segment } from 'amesu';
+import { Bot, Plugin } from '@kokkoro/core';
 import { throttle } from '@kokkoro/utils';
-import { Bot, Logger, segment } from 'kokkoro';
+import { Context } from '@kokkoro/core/lib/types';
 
 import { SetuOption } from '.';
-import { Context } from 'kokkoro/lib/events';
 
 export type LoliconSize = 'original' | 'regular' | 'small' | 'thumb' | 'mini';
 
@@ -81,9 +82,11 @@ const images_path = join(__dirname, '../images');
 export const r17_path = join(__workname, `/data/setu/r17`);
 export const r18_path = join(__workname, `/data/setu/r18`);
 
-export class SetuService extends EventEmitter {
+export class Service extends EventEmitter {
   /** API */
   api: string;
+  /** 代理 */
+  proxy: string;
   /** 本地最大缓存图片数 */
   max_setu: number;
   /** 单次补充图片数 */
@@ -100,14 +103,13 @@ export class SetuService extends EventEmitter {
   reload: () => void;
 
   constructor(
-    /** 日志 */
-    private logger: Logger,
-    /** 代理地址 */
-    private proxy: string = 'i.pixiv.re',
+    /** 插件 */
+    private plugin: Plugin,
   ) {
     super();
 
     this.api = 'https://api.lolicon.app/setu/v2';
+    this.proxy = process.env.SETU_PROXY ?? 'i.pixiv.re'
     this.max_setu = Number(process.env.SETU_COUNT ?? 500);
     this.reload_num = 20;
     this.reload_delay = Number(process.env.SETU_DELAY ?? 300000);
@@ -120,10 +122,10 @@ export class SetuService extends EventEmitter {
     this.on('setu.send.success', (bot, url, file) => {
       unlink(url)
         .then(() => {
-          this.logger.mark(`图片发送成功，已删除 ${file}`);
+          this.plugin.logger.mark(`图片发送成功，已删除 ${file}`);
         })
         .catch((error) => {
-          this.logger.error(error.message);
+          this.plugin.logger.error(error.message);
         });
     });
   }
@@ -154,7 +156,7 @@ export class SetuService extends EventEmitter {
         const list_length = this.imageList[type].length;
 
         if (list_length > this.max_setu) {
-          this.logger.mark(`${type} 库存充足，不用补充`);
+          this.plugin.logger.mark(`${type} 库存充足，不用补充`);
           continue;
         }
 
@@ -164,7 +166,7 @@ export class SetuService extends EventEmitter {
           num: this.reload_num,
           size: ['regular'],
         };
-        this.logger.mark(`${type} 色图正在补充中...`);
+        this.plugin.logger.mark(`${type} 色图正在补充中...`);
 
         try {
           const images = await this.getLoliconImages(param);
@@ -194,17 +196,17 @@ export class SetuService extends EventEmitter {
                 .then((response) => writeFile(setu_url, response.data, 'binary'))
                 .then(() => {
                   this.imageList[type].push(setu_name);
-                  this.logger.debug(`setu write success, ${pid} ${title}`);
+                  this.plugin.logger.debug(`setu write success, ${pid} ${title}`);
                 })
                 .catch((error) => {
-                  this.logger.error(`setu write error, ${error.message}`);
+                  this.plugin.logger.error(`setu write error, ${error.message}`);
                 })
             );
           }
           await Promise.allSettled(taskQueue);
-          this.logger.mark(`${type} 色图补充完毕`);
+          this.plugin.logger.mark(`${type} 色图补充完毕`);
         } catch (error) {
-          this.logger.error(`获取 ${type} 色图失败，${(<Error>error).message}`);
+          this.plugin.logger.error(`获取 ${type} 色图失败，${(<Error>error).message}`);
         }
       }
     }, this.reload_delay);
@@ -252,7 +254,7 @@ export class SetuService extends EventEmitter {
       const { error } = data as LoliconResult;
 
       if (error) {
-        this.logger.error(error);
+        this.plugin.logger.error(error);
         throw new Error(error);
       }
       return data.data;
@@ -319,7 +321,7 @@ export class SetuService extends EventEmitter {
 
       if (images_length) {
         const { pid, uid, title, author, tags, urls } = images[0];
-        const setu_url = urls[<'mini'>size[0]];
+        const setu_url = urls[size];
         const image_info = `作者:\n  ${author} (${uid})\n标题:\n  ${title} (${pid})\n标签:\n  ${tags
           .map((tag) => `[${tag}]`)
           .join(' ')}`;

@@ -1,7 +1,9 @@
+import axios from 'axios';
 import { join } from 'path';
-import { Plugin, Option, segment } from 'kokkoro';
+import { segment } from 'amesu';
+import { Plugin, Option } from '@kokkoro/core';
 
-import { LoliconSize, r17_path, r18_path, SetuService } from './service';
+import { LoliconSize, r17_path, r18_path, Service } from './service';
 
 export interface SetuOption extends Option {
   /** 单人每日色色次数限制 */
@@ -22,16 +24,15 @@ const option: SetuOption = {
   max_lsp: 5,
   r18: false,
   unsend: 0,
-  // ['regular', 'original', 'small']
   size: 'regular',
   // anti_harmony: true,
 };
-const { version } = require('../package.json');
+const pkg = require('../package.json');
 const plugin = new Plugin('setu', option);
-const service = new SetuService(plugin.logger, process.env.SETU_PROXY);
+const service = new Service(plugin);
 
 plugin
-  .version(version)
+  .version(pkg.version)
   .schedule('0 0 5 * *', () => service.clearLspMap())
 
 plugin
@@ -41,8 +42,8 @@ plugin
   .prevent(async (ctx) => {
     await ctx.reply('不可以色色！', true);
   })
-  .action(async (ctx) => {
-    const { option, bot, sender } = ctx;
+  .action(async (ctx, bot) => {
+    const { option, sender } = ctx;
     const { r18, unsend } = option as SetuOption;
     const is_ban = service.smallBlackRoom(ctx);
 
@@ -52,7 +53,8 @@ plugin
     const setuInfo = service.getRandomSetu(r18);
     const { setu_url, image_info, setu_file } = setuInfo;
 
-    await ctx.reply(image_info)
+    await ctx
+      .reply(image_info)
       .then(() => segment.image(setu_url))
       .then(image => ctx.reply([image]))
       .then((message_ret) => {
@@ -70,11 +72,11 @@ plugin
   .command('search <...tags>', 'group')
   .description('检索在线涩图')
   .sugar(/^来[点张份](?<tags>.+)[涩瑟色]图$/)
-  .prevent(ctx => {
-    ctx.reply('不可以色色！', true);
+  .prevent(async (ctx) => {
+    await ctx.reply('不可以色色！', true);
   })
-  .action((ctx) => {
-    const { option, bot, query, sender } = ctx;
+  .action(async (ctx, bot) => {
+    const { option, query, sender } = ctx;
     const { tags } = query;
     const { unsend, r18 } = option as SetuOption;
     const is_ban = service.smallBlackRoom(ctx);
@@ -82,7 +84,8 @@ plugin
     if (is_ban) {
       return;
     }
-    ctx.reply('图片检索中，请耐心等待喵~', true)
+    ctx
+      .reply('图片检索中，请耐心等待喵~', true)
       .then(() => service.searchLoliconImage(tags, option as SetuOption))
       .then(async (setu_info) => {
         const { setu_url, image_info } = setu_info;
@@ -123,10 +126,10 @@ plugin
   .command('multi <number>', 'group')
   .description('获取多张色图')
   .sugar(/^来(?<number>[1-9]\d*)[点张份][涩瑟色]图$/)
-  .prevent(ctx => {
-    ctx.reply('不可以色色！', true);
+  .prevent(async (ctx) => {
+    await ctx.reply('不可以色色！', true);
   })
-  .action(async (ctx) => {
+  .action(async (ctx, bot) => {
     const { option, query } = ctx;
     const { number } = query;
     const { r18 } = option as SetuOption;
@@ -156,7 +159,7 @@ plugin
       const message = {
         message: [image_info, '\n', segment.image(setu_url)],
         user_id: ctx.self_id,
-        nickname: ctx.bot.nickname,
+        nickname: bot.nickname,
       };
 
       forwardMessage.push(message);
@@ -167,3 +170,14 @@ plugin
       .catch(error => ctx.reply(error.message))
   })
 
+// function downloadImage(url: string) {
+//   return new Promise((resolve, reject) => {
+//     axios.get(url, { responseType: 'arraybuffer', timeout: 5000, })
+//       .then((response) => {
+//         resolve(segment.image(response.data));
+//       })
+//       .catch((error: Error) => {
+//         reject(new Error(`${error.message}\n图片下载失败，地址:\n${url}`));
+//       })
+//   })
+// }
